@@ -51,9 +51,25 @@ char **split_line(char *line) {
 	return args;
 }
 
+char *prev_dir, *prev_tmp;
 int invoke_command(char **args){
 	// nothing
 	if (args[0] == NULL) {
+		return 1;
+	} else if (strcmp(args[0], "cd") == 0){
+		if (args[1] == NULL) {
+			fprintf(stderr, "usage: cd <DirectoryName>\n");
+			return 1;
+		} else if (strcmp(args[1], "-") == 0){
+			args[1] = prev_dir;
+		}
+		
+		getcwd(prev_tmp, BUFSIZE);
+		if (chdir(args[1]) == -1){
+			printf("can not change directory to %s\n", args[1]);
+		} else {
+			memcpy(prev_dir, prev_tmp, BUFSIZE);
+		}
 		return 1;
 	}
 
@@ -92,6 +108,8 @@ int main() {
 	int stat = 1;
 	char* line;
 	char** args;
+	prev_dir = malloc(BUFSIZE * sizeof(char));
+	prev_tmp = malloc(BUFSIZE * sizeof(char));
 	do {
 		printf("$ ");
 		line = read_line();
